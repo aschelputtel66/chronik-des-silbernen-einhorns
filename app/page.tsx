@@ -37,11 +37,11 @@ const normalize = (value: string) =>
 
 function HornMark({ compact = false }: { compact?: boolean }) {
   return (
-    <span className={`horn-mark${compact ? " horn-mark--compact" : ""}`} aria-hidden="true">
-      <span className="horn-mark__arc" />
-      <span className="horn-mark__line" />
-      <span className="horn-mark__star">✦</span>
-    </span>
+    <span
+      className={`horn-mark${compact ? " horn-mark--compact" : ""}`}
+      aria-hidden="true"
+      style={{ backgroundImage: "url('./veyr-unicorn-mark.webp')" }}
+    />
   );
 }
 
@@ -480,7 +480,7 @@ export default function Home() {
               Anerkennung durch den Kronrat und politische Unterstützung wirken gemeinsam.
             </p>
           </div>
-          <div className="family-tree" aria-label="Vereinfachter Stammbaum des Hauses Veyr">
+          <div className="family-tree" aria-label="Stammbaum des Hauses Veyr">
             <div className="family-level family-level--founders">
               <button onClick={() => setSelectedEntry({
                 id: "alaric-mereth",
@@ -497,25 +497,42 @@ export default function Home() {
               </button>
             </div>
             <div className="family-connector family-connector--trunk" />
-            <div className="family-level family-level--children">
-              <button onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "olyvar-veyr")!)} type="button">
-                <span>Ältester Sohn</span><strong>Olyvar Veyr</strong><small>König von Valdren</small>
-              </button>
-              <button onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "meren-veyr")!)} type="button">
-                <span>Jüngerer Sohn</span><strong>Meren Veyr †</strong><small>Lysara Maelith Veyr</small>
-              </button>
-              <button onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "seralyne-veyr")!)} type="button">
-                <span>Tochter</span><strong>Seralyne Veyr</strong><small>Edric Merolt</small>
-              </button>
-            </div>
-            <div className="family-level family-level--heirs">
-              <div className="family-spacer" />
-              <button onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "renara-veyr")!)} type="button">
-                <span>Tochter Meren’s</span><strong>Renara Lysenne Veyr</strong><small>{stage === 5 ? "24 Jahre · Haderfels" : "19 Jahre · Marathien"}</small>
-              </button>
-              <button onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "caedren-veyr-merolt")!)} type="button">
-                <span>Sohn Seralyne’s</span><strong>Caedren Veyr-Merolt</strong><small>Prinz von Valdren</small>
-              </button>
+            <div className="family-branches">
+              <div className="family-branch family-branch--single">
+                <div className="family-couple family-couple--single">
+                  <button onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "olyvar-veyr")!)} type="button">
+                    <span>Ältester Sohn</span><strong>Olyvar Veyr</strong><small>König von Valdren · unverheiratet</small>
+                  </button>
+                </div>
+              </div>
+              <div className="family-branch">
+                <div className="family-couple">
+                  <button onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "meren-veyr")!)} type="button">
+                    <span>Jüngerer Sohn</span><strong>Meren Veyr †</strong><small>Prinz von Valdren</small>
+                  </button>
+                  <button onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "lysara-veyr")!)} type="button">
+                    <span>Gemahlin Meren’s</span><strong>Lysara Maelith Veyr</strong><small>Renara’s Mutter · geborene Thalen</small>
+                  </button>
+                </div>
+                <div className="family-descent" />
+                <button className="family-heir" onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "renara-veyr")!)} type="button">
+                  <span>Gemeinsame Tochter</span><strong>Renara Lysenne Veyr</strong><small>{stage === 5 ? "24 Jahre · Haderfels" : "19 Jahre · Marathien"}</small>
+                </button>
+              </div>
+              <div className="family-branch">
+                <div className="family-couple">
+                  <button onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "seralyne-veyr")!)} type="button">
+                    <span>Tochter</span><strong>Seralyne Veyr</strong><small>Prinzessin von Valdren</small>
+                  </button>
+                  <button onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "edric-merolt")!)} type="button">
+                    <span>Gemahl Seralyne’s</span><strong>Herzog Edric Merolt</strong><small>Caedren’s Vater · Haus Merolt</small>
+                  </button>
+                </div>
+                <div className="family-descent" />
+                <button className="family-heir" onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "caedren-veyr-merolt")!)} type="button">
+                  <span>Gemeinsamer Sohn</span><strong>Caedren Veyr-Merolt</strong><small>Prinz von Valdren</small>
+                </button>
+              </div>
             </div>
           </div>
           <div className="relationship-note">

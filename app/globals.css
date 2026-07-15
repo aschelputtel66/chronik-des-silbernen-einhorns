@@ -169,89 +169,20 @@ input:focus-visible {
 }
 
 .horn-mark {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: 50%;
   display: inline-block;
   height: 92px;
   min-width: 92px;
-  position: relative;
   width: 92px;
-}
-
-.horn-mark::before,
-.horn-mark::after {
-  border: 1px solid rgba(241, 233, 216, 0.64);
-  border-radius: 50%;
-  content: "";
-  inset: 8px;
-  position: absolute;
-}
-
-.horn-mark::after {
-  border-color: rgba(241, 233, 216, 0.14);
-  inset: 13px;
-}
-
-.horn-mark__arc {
-  border-left: 1px solid var(--ivory);
-  border-radius: 52% 0 0 52%;
-  border-top: 1px solid var(--ivory);
-  height: 35px;
-  left: 29px;
-  position: absolute;
-  top: 34px;
-  transform: rotate(-26deg);
-  width: 31px;
-}
-
-.horn-mark__line {
-  background: var(--ivory);
-  height: 1px;
-  left: 45px;
-  position: absolute;
-  top: 20px;
-  transform: rotate(-20deg);
-  transform-origin: left;
-  width: 25px;
-}
-
-.horn-mark__star {
-  color: var(--ivory);
-  font-size: 0.52rem;
-  left: 43px;
-  position: absolute;
-  top: 41px;
 }
 
 .horn-mark--compact {
   height: 48px;
   min-width: 48px;
   width: 48px;
-}
-
-.horn-mark--compact::before {
-  inset: 3px;
-}
-
-.horn-mark--compact::after {
-  inset: 7px;
-}
-
-.horn-mark--compact .horn-mark__arc {
-  height: 20px;
-  left: 14px;
-  top: 17px;
-  width: 18px;
-}
-
-.horn-mark--compact .horn-mark__line {
-  left: 24px;
-  top: 9px;
-  width: 14px;
-}
-
-.horn-mark--compact .horn-mark__star {
-  font-size: 0.34rem;
-  left: 22px;
-  top: 20px;
 }
 
 .site-nav {
@@ -1101,7 +1032,7 @@ input:focus-visible {
   min-width: 850px;
 }
 
-.family-level button {
+.family-tree button {
   background: linear-gradient(150deg, rgba(16, 34, 26, 0.86), rgba(7, 12, 9, 0.86));
   border: 1px solid var(--line);
   cursor: pointer;
@@ -1113,12 +1044,12 @@ input:focus-visible {
   transition: border-color 160ms ease, transform 160ms ease;
 }
 
-.family-level button:hover {
+.family-tree button:hover {
   border-color: var(--silver);
   transform: translateY(-2px);
 }
 
-.family-level span {
+.family-tree span {
   color: var(--rust-light);
   font-family: var(--mono);
   font-size: 0.58rem;
@@ -1126,28 +1057,20 @@ input:focus-visible {
   text-transform: uppercase;
 }
 
-.family-level strong {
+.family-tree strong {
   font-family: var(--display);
   font-size: 1.35rem;
   font-weight: 500;
   margin: 15px 0 7px;
 }
 
-.family-level small {
+.family-tree small {
   color: var(--silver-muted);
 }
 
 .family-level--founders {
   max-width: 350px;
-}
-
-.family-level--children,
-.family-level--heirs {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.family-level--heirs {
-  margin-top: 26px;
+  min-width: 350px;
 }
 
 .family-connector--trunk {
@@ -1160,8 +1083,53 @@ input:focus-visible {
   width: 68%;
 }
 
-.family-spacer {
-  border-right: 1px solid var(--line-soft);
+.family-branches {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 0.8fr 1.45fr 1.45fr;
+  margin: 0 auto;
+  min-width: 1120px;
+}
+
+.family-branch {
+  display: flex;
+  flex-direction: column;
+}
+
+.family-couple {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  position: relative;
+}
+
+.family-couple::after {
+  background: var(--line);
+  content: "";
+  height: 1px;
+  left: calc(50% - 7px);
+  position: absolute;
+  top: 65px;
+  width: 14px;
+}
+
+.family-couple--single {
+  grid-template-columns: 1fr;
+}
+
+.family-couple--single::after {
+  display: none;
+}
+
+.family-descent {
+  border-left: 1px solid var(--line);
+  height: 28px;
+  margin: 0 auto;
+}
+
+.family-heir {
+  margin: 0 auto;
+  width: min(72%, 310px);
 }
 
 .relationship-note {
