@@ -4,6 +4,9 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   allSearchableEntries,
   ArchiveEntry,
+  ChronicleId,
+  FigureAppearance,
+  FigureRole,
   figures,
   glossary,
   places,
@@ -20,6 +23,16 @@ type SectionId =
   | "glossar"
   | "suche";
 
+type FigureView = "cast" | "archive";
+type FigureChronicleFilter = "alle" | ChronicleId;
+
+const chronicleLabels: Record<ChronicleId, string> = {
+  rotstaub: "Der Rote Staub von Marathien",
+  kette: "Das Gesetz der Kette",
+};
+
+const roleOrder: FigureRole[] = ["Hauptfigur", "Wichtige Figur", "Nebenfigur", "Erwähnt"];
+
 const navigation: { id: SectionId; label: string }[] = [
   { id: "start", label: "Start" },
   { id: "figuren", label: "Figuren" },
@@ -34,6 +47,34 @@ const normalize = (value: string) =>
     .toLocaleLowerCase("de")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
+
+const getFigureAppearances = (entry: ArchiveEntry): FigureAppearance[] => {
+  if (entry.appearances?.length) return entry.appearances;
+
+  const chronicle: ChronicleId = entry.from <= 4 ? "rotstaub" : "kette";
+  const firstAct = chronicle === "rotstaub" ? entry.from : entry.from - 4;
+  const finalAct = chronicle === "rotstaub" ? 4 : 2;
+
+  return [
+    {
+      acts: Array.from({ length: finalAct - firstAct + 1 }, (_, index) => firstAct + index),
+      chronicle,
+      group: entry.group,
+      role: "Nebenfigur",
+    },
+  ];
+};
+
+const getFigureContext = (stage: number) => ({
+  act: stage <= 4 ? stage : stage - 4,
+  chronicle: (stage <= 4 ? "rotstaub" : "kette") as ChronicleId,
+});
+
+const formatActs = (acts: number[]) => {
+  if (acts.length === 1) return `Akt ${acts[0]}`;
+  const sorted = acts.slice().sort((a, b) => a - b);
+  return `Akt ${sorted[0]}–${sorted[sorted.length - 1]}`;
+};
 
 function HornMark({ compact = false }: { compact?: boolean }) {
   return (
@@ -67,6 +108,59 @@ function EntryCard({
       <span className="entry-card__footer">
         <span>{entry.tags.slice(0, 2).join(" · ")}</span>
         <span>{availableUpdates.length ? `+ ${availableUpdates.length} Nachtrag` : "Akte öffnen"}</span>
+      </span>
+    </button>
+  );
+}
+
+function FigureCard({
+  entry,
+  appearance,
+  appearances,
+  stage,
+  onOpen,
+}: {
+  entry: ArchiveEntry;
+  appearance?: FigureAppearance;
+  appearances?: FigureAppearance[];
+  stage: number;
+  onOpen: (entry: ArchiveEntry) => void;
+}) {
+  const latestUpdate = entry.updates
+    ?.filter((update) => update.from <= stage)
+    .slice()
+    .sort((a, b) => b.from - a.from)[0];
+  const summary = latestUpdate?.text ?? entry.summary;
+  const firstAct = appearance ? Math.min(...appearance.acts) : null;
+  const currentAct = getFigureContext(stage).act;
+
+  return (
+    <button className="entry-card figure-card" onClick={() => onOpen(entry)} type="button">
+      <span className="entry-card__topline">
+        <span>{appearance?.group ?? entry.group}</span>
+        <span className="figure-role">{appearance?.role ?? "Archiv"}</span>
+      </span>
+      <strong>{entry.name}</strong>
+      <span className="figure-card__function">{entry.eyebrow}</span>
+      <span className="entry-card__summary">{summary}</span>
+      {appearance && (
+        <span className="figure-card__context">
+          <span>{chronicleLabels[appearance.chronicle]}</span>
+          <strong>{firstAct === currentAct ? `Neu in Akt ${currentAct}` : formatActs(appearance.acts)}</strong>
+        </span>
+      )}
+      {appearances && (
+        <span className="figure-card__chronicles" aria-label="Auftritte in den Chroniken">
+          {appearances.map((item) => (
+            <span key={`${entry.id}-${item.chronicle}`}>
+              {item.chronicle === "rotstaub" ? "Rotstaub" : "Kette"} · {formatActs(item.acts)}
+            </span>
+          ))}
+        </span>
+      )}
+      <span className="entry-card__footer">
+        <span>{entry.tags.slice(0, 2).join(" · ")}</span>
+        <span>Akte öffnen</span>
       </span>
     </button>
   );
@@ -200,7 +294,10 @@ export default function Home() {
   const [selectedEntry, setSelectedEntry] = useState<ArchiveEntry | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [glossaryQuery, setGlossaryQuery] = useState("");
-  const [figureGroup, setFigureGroup] = useState("Alle");
+  const [figureView, setFigureView] = useState<FigureView>("cast");
+  const [figureRole, setFigureRole] = useState<"Alle" | FigureRole>("Alle");
+  const [figureChronicle, setFigureChronicle] = useState<FigureChronicleFilter>("alle");
+  const [figureQuery, setFigureQuery] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -236,16 +333,71 @@ export default function Home() {
   const visiblePlaces = useMemo(() => places.filter((entry) => entry.from <= stage), [stage]);
   const visibleGlossary = useMemo(() => glossary.filter((entry) => entry.from <= stage), [stage]);
   const visibleTimeline = useMemo(() => timeline.filter((entry) => entry.from <= stage), [stage]);
+  const figureContext = getFigureContext(stage);
 
-  const figureGroups = useMemo(
-    () => ["Alle", ...Array.from(new Set(visibleFigures.map((entry) => entry.group)))],
-    [visibleFigures],
+  const castFigures = useMemo(() => {
+    const query = normalize(figureQuery);
+
+    return visibleFigures
+      .map((entry) => ({
+        appearance: getFigureAppearances(entry).find(
+          (item) =>
+            item.chronicle === figureContext.chronicle &&
+            item.acts.includes(figureContext.act) &&
+            item.role !== "Erwähnt",
+        ),
+        entry,
+      }))
+      .filter(
+        (item): item is { entry: ArchiveEntry; appearance: FigureAppearance } =>
+          Boolean(item.appearance),
+      )
+      .filter(({ appearance }) => figureRole === "Alle" || appearance.role === figureRole)
+      .filter(({ entry }) =>
+        !query
+          ? true
+          : normalize(`${entry.name} ${entry.eyebrow} ${entry.summary} ${entry.tags.join(" ")}`).includes(query),
+      )
+      .sort((a, b) => {
+        const roleDifference = roleOrder.indexOf(a.appearance.role) - roleOrder.indexOf(b.appearance.role);
+        return roleDifference || a.entry.name.localeCompare(b.entry.name, "de");
+      });
+  }, [figureContext.act, figureContext.chronicle, figureQuery, figureRole, visibleFigures]);
+
+  const archiveFigures = useMemo(() => {
+    const query = normalize(figureQuery);
+
+    return visibleFigures
+      .map((entry) => ({
+        appearances: getFigureAppearances(entry).filter((appearance) =>
+          figureChronicle === "alle" ? true : appearance.chronicle === figureChronicle,
+        ),
+        entry,
+      }))
+      .filter(({ appearances }) => appearances.length > 0)
+      .filter(({ entry }) =>
+        !query
+          ? true
+          : normalize(`${entry.name} ${entry.eyebrow} ${entry.summary} ${entry.tags.join(" ")}`).includes(query),
+      )
+      .sort((a, b) => a.entry.name.localeCompare(b.entry.name, "de"));
+  }, [figureChronicle, figureQuery, visibleFigures]);
+
+  const availableFigureRoles = useMemo(
+    () =>
+      roleOrder.filter((role) =>
+        visibleFigures.some((entry) =>
+          getFigureAppearances(entry).some(
+            (appearance) =>
+              appearance.chronicle === figureContext.chronicle &&
+              appearance.acts.includes(figureContext.act) &&
+              appearance.role === role &&
+              role !== "Erwähnt",
+          ),
+        ),
+      ),
+    [figureContext.act, figureContext.chronicle, visibleFigures],
   );
-
-  const filteredFigures = useMemo(() => {
-    if (figureGroup === "Alle") return visibleFigures;
-    return visibleFigures.filter((entry) => entry.group === figureGroup);
-  }, [figureGroup, visibleFigures]);
 
   const filteredGlossary = useMemo(() => {
     const query = normalize(glossaryQuery);
@@ -269,7 +421,8 @@ export default function Home() {
     setStage(nextStage);
     window.localStorage.setItem("silberhorn-reading-stage", String(nextStage));
     setReadingOpen(false);
-    setFigureGroup("Alle");
+    setFigureRole("Alle");
+    setFigureQuery("");
   };
 
   const navigate = (section: SectionId) => {
@@ -286,7 +439,7 @@ export default function Home() {
 
   const rotstaubStatus =
     stage === 1 ? "Akt I" : stage === 2 ? "Akt II" : stage === 3 ? "Akt III" : "vollständig";
-  const ketteStatus = stage === 5 ? "Akt I" : "noch nicht begonnen";
+  const ketteStatus = stage === 5 ? "Akt I" : stage >= 6 ? "Akt II" : "noch nicht begonnen";
 
   return (
     <main className="site-shell">
@@ -393,7 +546,7 @@ export default function Home() {
               </div>
               <dl className="register-meta">
                 <div><dt>Einträge</dt><dd>{visibleFigures.length + visiblePlaces.length + visibleGlossary.length}</dd></div>
-                <div><dt>Zeitraum</dt><dd>{stage === 5 ? "bis 1876" : "bis 1873"}</dd></div>
+                <div><dt>Zeitraum</dt><dd>{stage >= 5 ? "bis 1876" : "bis 1873"}</dd></div>
                 <div><dt>Spoilerfilter</dt><dd>aktiv</dd></div>
               </dl>
               <button onClick={() => setReadingOpen(true)} type="button">Stand prüfen</button>
@@ -435,29 +588,118 @@ export default function Home() {
           <SectionHeading
             eyebrow="Personenregister"
             stageLabel={currentStage.shortLabel}
-            text="Hof, Garnison, Handel und Widerstand. Jeder Eintrag bleibt auf deinem gewählten Lesestand."
+            text="Die aktuelle Besetzung bleibt übersichtlich; frühere und erwähnte Personen bleiben im vollständigen Archiv nachschlagbar."
             title="Figuren"
           />
-          <div className="filter-row" aria-label="Figuren nach Bereich filtern">
-            {figureGroups.map((group) => (
-              <button
-                className={figureGroup === group ? "is-active" : ""}
-                key={group}
-                onClick={() => setFigureGroup(group)}
-                type="button"
-              >
-                {group}
-              </button>
-            ))}
+          <div className="figure-view-switch" aria-label="Ansicht des Figurenregisters">
+            <button
+              className={figureView === "cast" ? "is-active" : ""}
+              onClick={() => {
+                setFigureView("cast");
+                setFigureRole("Alle");
+              }}
+              type="button"
+            >
+              <span>Aktuelle Auswahl</span>
+              <strong>Besetzung dieser Chronik</strong>
+              <small>{chronicleLabels[figureContext.chronicle]} · Akt {figureContext.act}</small>
+            </button>
+            <button
+              className={figureView === "archive" ? "is-active" : ""}
+              onClick={() => {
+                setFigureView("archive");
+                setFigureChronicle("alle");
+              }}
+              type="button"
+            >
+              <span>Vollständiger Nachschlag</span>
+              <strong>Gesamtes Figurenarchiv</strong>
+              <small>Auch frühere und nur erwähnte Personen</small>
+            </button>
           </div>
-          <div className="entry-grid">
-            {filteredFigures
-              .slice()
-              .sort((a, b) => a.name.localeCompare(b.name, "de"))
-              .map((entry) => (
-                <EntryCard entry={entry} key={entry.id} onOpen={setSelectedEntry} stage={stage} />
+
+          <div className="figure-register-bar">
+            <div>
+              <span>{figureView === "cast" ? "Aktuelle Besetzung" : "Archivbestand"}</span>
+              <strong>{figureView === "cast" ? castFigures.length : archiveFigures.length} Figuren</strong>
+            </div>
+            <label className="figure-search">
+              <span className="search-icon" aria-hidden="true" />
+              <span className="sr-only">Figuren durchsuchen</span>
+              <input
+                onChange={(event) => setFigureQuery(event.target.value)}
+                placeholder="Name, Haus oder Funktion suchen …"
+                type="search"
+                value={figureQuery}
+              />
+            </label>
+          </div>
+
+          {figureView === "cast" ? (
+            <div className="filter-row" aria-label="Aktuelle Figuren nach Bedeutung filtern">
+              {["Alle", ...availableFigureRoles].map((role) => (
+                <button
+                  className={figureRole === role ? "is-active" : ""}
+                  key={role}
+                  onClick={() => setFigureRole(role as "Alle" | FigureRole)}
+                  type="button"
+                >
+                  {role === "Alle" ? "Alle Rollen" : role}
+                </button>
               ))}
+            </div>
+          ) : (
+            <div className="filter-row" aria-label="Figurenarchiv nach Chronik filtern">
+              {([
+                ["alle", "Alle Chroniken"],
+                ["rotstaub", "Der Rote Staub von Marathien"],
+                ["kette", "Das Gesetz der Kette"],
+              ] as [FigureChronicleFilter, string][]).map(([value, label]) => (
+                <button
+                  className={figureChronicle === value ? "is-active" : ""}
+                  key={value}
+                  onClick={() => setFigureChronicle(value)}
+                  type="button"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="figure-register-note">
+            <span>{figureView === "cast" ? "Im gewählten Akt" : "Nachschlagen"}</span>
+            <p>
+              {figureView === "cast"
+                ? "Hier erscheinen nur Personen mit einer aktiven Rolle. Reine Erwähnungen und Figuren anderer Chroniken bleiben im Archiv."
+                : "Die Kennzeichnung auf jeder Karte zeigt, zu welcher Chronik und zu welchen Akten eine Person gehört."}
+            </p>
           </div>
+
+          <div className="entry-grid entry-grid--figures">
+            {figureView === "cast"
+              ? castFigures.map(({ entry, appearance }) => (
+                  <FigureCard
+                    appearance={appearance}
+                    entry={entry}
+                    key={entry.id}
+                    onOpen={setSelectedEntry}
+                    stage={stage}
+                  />
+                ))
+              : archiveFigures.map(({ entry, appearances }) => (
+                  <FigureCard
+                    appearances={appearances}
+                    entry={entry}
+                    key={entry.id}
+                    onOpen={setSelectedEntry}
+                    stage={stage}
+                  />
+                ))}
+          </div>
+          {!(figureView === "cast" ? castFigures.length : archiveFigures.length) && (
+            <p className="empty-state">Keine freigegebene Figur passt zu dieser Auswahl.</p>
+          )}
         </section>
       )}
 
@@ -501,7 +743,7 @@ export default function Home() {
               <div className="family-branch family-branch--single">
                 <div className="family-couple family-couple--single">
                   <button onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "olyvar-veyr")!)} type="button">
-                    <span>Ältester Sohn</span><strong>Olyvar Veyr</strong><small>König von Valdren · unverheiratet</small>
+                  <span>Ältester Sohn</span><strong>Olyvar Veyr</strong><small>König von Valdren · Witwer</small>
                   </button>
                 </div>
               </div>
@@ -516,7 +758,7 @@ export default function Home() {
                 </div>
                 <div className="family-descent" />
                 <button className="family-heir" onClick={() => setSelectedEntry(figures.find((entry) => entry.id === "renara-veyr")!)} type="button">
-                  <span>Gemeinsame Tochter</span><strong>Renara Lysenne Veyr</strong><small>{stage === 5 ? "24 Jahre · Haderfels" : "19 Jahre · Marathien"}</small>
+                  <span>Gemeinsame Tochter</span><strong>Renara Lysenne Veyr</strong><small>{stage >= 5 ? "24 Jahre · Haderfels" : "19 Jahre · Marathien"}</small>
                 </button>
               </div>
               <div className="family-branch">

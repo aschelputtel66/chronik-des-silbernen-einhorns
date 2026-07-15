@@ -11,6 +11,17 @@ export type EntryUpdate = {
   text: string;
 };
 
+export type ChronicleId = "rotstaub" | "kette";
+
+export type FigureRole = "Hauptfigur" | "Wichtige Figur" | "Nebenfigur" | "Erwähnt";
+
+export type FigureAppearance = {
+  chronicle: ChronicleId;
+  acts: number[];
+  role: FigureRole;
+  group?: string;
+};
+
 export type ArchiveEntry = {
   id: string;
   name: string;
@@ -20,6 +31,7 @@ export type ArchiveEntry = {
   summary: string;
   tags: string[];
   updates?: EntryUpdate[];
+  appearances?: FigureAppearance[];
 };
 
 export type TimelineEntry = {
@@ -62,6 +74,12 @@ export const readingStages: ReadingStage[] = [
     shortLabel: "Kette · Akt I",
     note: "Unter Stein und Sternmetall · Spätsommer 1876",
   },
+  {
+    id: 6,
+    label: "Das Gesetz der Kette · Akt II",
+    shortLabel: "Kette · Akt II",
+    note: "Veyrheim und Silbrück · 1876",
+  },
 ];
 
 export const figures: ArchiveEntry[] = [
@@ -74,6 +92,10 @@ export const figures: ArchiveEntry[] = [
     summary:
       "Im Jahr 1871 neunzehnjährige Prinzessin und Sondergesandte des Hauses Veyr in Marathien. Renara beobachtet militärische Verträge, Berichte und Abläufe, ohne der Garnison unmittelbar Befehle erteilen zu dürfen. Sie denkt in Mustern, Wegen, Abhängigkeiten und Wirkungen.",
     tags: ["Renara", "Haus Veyr", "Valdren", "Sondergesandte", "Marathien"],
+    appearances: [
+      { chronicle: "rotstaub", acts: [1, 2, 3, 4], role: "Hauptfigur", group: "Gesandtschaft" },
+      { chronicle: "kette", acts: [1, 2], role: "Hauptfigur", group: "Haus Veyr" },
+    ],
     updates: [
       {
         from: 4,
@@ -96,6 +118,10 @@ export const figures: ArchiveEntry[] = [
     summary:
       "Renara’s Leibwächter, Schutzmann und langjähriger Begleiter aus dem Umfeld Thalenwacht’s. Odrik beobachtet Hände, Türen und Gefahren, während Renara Systeme beobachtet. Er widerspricht ihr regelmässig, wenn sie bei der Verfolgung eines Musters Menschen aus dem Blick verliert.",
     tags: ["Odrik", "Thalenwacht", "Leibwächter", "Hauptmann"],
+    appearances: [
+      { chronicle: "rotstaub", acts: [1, 2, 3, 4], role: "Wichtige Figur", group: "Gesandtschaft" },
+      { chronicle: "kette", acts: [1, 2], role: "Wichtige Figur", group: "Haus Veyr" },
+    ],
     updates: [
       {
         from: 5,
@@ -111,8 +137,19 @@ export const figures: ArchiveEntry[] = [
     group: "Haus Veyr",
     from: 1,
     summary:
-      "Amtierender König von Valdren und älterer Bruder Meren’s und Seralyne’s. Er ist der Onkel Renara’s und Caedren’s und besitzt keine lebenden Kinder.",
+      "Amtierender König von Valdren und älterer Bruder Meren’s und Seralyne’s. Er ist der Onkel Renara’s und Caedren’s, Witwer Königin Elowen’s und besitzt keine lebenden Kinder.",
     tags: ["Olyvar", "Haus Veyr", "König", "Thronfolge"],
+    appearances: [
+      { chronicle: "rotstaub", acts: [1, 2, 3, 4], role: "Erwähnt", group: "Haus Veyr" },
+      { chronicle: "kette", acts: [2], role: "Wichtige Figur", group: "Haus Veyr" },
+    ],
+    updates: [
+      {
+        from: 6,
+        label: "Stand 1876",
+        text: "Der schwer erkrankte König führt sein Amt formal weiter. Seine Unterschrift und sein Siegel bleiben gültig, während Kanzlei und Kronrat immer mehr Regierungsgeschäfte übernehmen.",
+      },
+    ],
   },
   {
     id: "meren-veyr",
@@ -123,6 +160,10 @@ export const figures: ArchiveEntry[] = [
     summary:
       "Renara’s Vater und jüngerer Bruder König Olyvar’s. Meren fiel 1866 im Zweiten Marovarischen Grenzkrieg bei Karganth. Verspätete Befehle, Versorgungsprobleme und Verwaltungsfehler überschatten die Umstände seines Todes.",
     tags: ["Meren", "Haus Veyr", "Karganth", "Grenzkrieg"],
+    appearances: [
+      { chronicle: "rotstaub", acts: [1, 2, 3, 4], role: "Erwähnt", group: "Haus Veyr" },
+      { chronicle: "kette", acts: [2], role: "Erwähnt", group: "Haus Veyr" },
+    ],
   },
   {
     id: "lysara-veyr",
@@ -133,6 +174,10 @@ export const figures: ArchiveEntry[] = [
     summary:
       "Renara’s Mutter aus dem alten Grenzhaus Thalen. Von ihr erbte Renara das dunkle Haar und ihre enge Verbindung zu Thalenwacht.",
     tags: ["Lysara", "Thalen", "Thalenwacht", "Haus Veyr"],
+    appearances: [
+      { chronicle: "rotstaub", acts: [1, 2, 3, 4], role: "Erwähnt", group: "Haus Veyr" },
+      { chronicle: "kette", acts: [2], role: "Erwähnt", group: "Haus Veyr" },
+    ],
   },
   {
     id: "seralyne-veyr",
@@ -143,6 +188,17 @@ export const figures: ArchiveEntry[] = [
     summary:
       "Schwester König Olyvar’s und des verstorbenen Meren Veyr. Sie ist Renara’s Tante und Caedren’s Mutter.",
     tags: ["Seralyne", "Merolt", "Haus Veyr"],
+    appearances: [
+      { chronicle: "rotstaub", acts: [1, 2, 3, 4], role: "Erwähnt", group: "Haus Veyr" },
+      { chronicle: "kette", acts: [2], role: "Wichtige Figur", group: "Haus Veyr" },
+    ],
+    updates: [
+      {
+        from: 6,
+        label: "Stand 1876",
+        text: "Als geborene Veyr-Prinzessin, Herzogin von Merolt und Caedren’s Mutter besitzt Seralyne in der beginnenden Thronfolgekrise erhebliches höfisches Gewicht.",
+      },
+    ],
   },
   {
     id: "edric-merolt",
@@ -153,6 +209,17 @@ export const figures: ArchiveEntry[] = [
     summary:
       "Ehemann Seralyne’s und Vater Caedren’s. Seine Verbindung zum Königshaus stärkt Haus Merolt und Caedren’s Stellung am valdrenischen Hof.",
     tags: ["Edric", "Merolt", "Caedren", "Hof"],
+    appearances: [
+      { chronicle: "rotstaub", acts: [1, 2, 3, 4], role: "Erwähnt", group: "Haus Veyr" },
+      { chronicle: "kette", acts: [2], role: "Wichtige Figur", group: "Kronrat" },
+    ],
+    updates: [
+      {
+        from: 6,
+        label: "Adelssitz im Kronrat",
+        text: "Oberhaupt des Hauses Merolt und Inhaber des Adelssitzes. Edric vertritt Hochadel, Landrechte und alte Häuser und ist zugleich Caedren’s Vater sowie Renara’s Onkel durch Heirat.",
+      },
+    ],
   },
   {
     id: "caedren-veyr-merolt",
@@ -163,6 +230,17 @@ export const figures: ArchiveEntry[] = [
     summary:
       "Im Jahr 1871 zwanzigjähriger Sohn Seralyne’s und Edric’s, Cousin Renara’s und Neffe König Olyvar’s. Er gilt am Hof als freundlich, geduldig und ausgleichend und entspricht äusserlich stark dem traditionellen Ideal des Hauses Veyr.",
     tags: ["Caedren", "Merolt", "Haus Veyr", "Thronfolge"],
+    appearances: [
+      { chronicle: "rotstaub", acts: [1, 2, 3, 4], role: "Erwähnt", group: "Haus Veyr" },
+      { chronicle: "kette", acts: [2], role: "Wichtige Figur", group: "Haus Veyr" },
+    ],
+    updates: [
+      {
+        from: 6,
+        label: "Stand 1876",
+        text: "Der fünfundzwanzigjährige Prinz entspricht stark dem traditionellen Bild des Hauses Veyr. Sein Name fällt häufig, sobald der Hof über Zukunft, Stabilität und Nachfolge spricht.",
+      },
+    ],
   },
   {
     id: "kapitaen-berolt",
@@ -297,6 +375,9 @@ export const figures: ArchiveEntry[] = [
     summary:
       "Eine verfemte Magierin, die in Haderfels nicht mit ihrem Namen, sondern als Sonderwaffe geführt wird. Ihre Magie reagiert auf Spannungen, Brüche und Veränderungen. Renara zwingt den Orden, ihren Namen anzuerkennen, bevor sie Ashael an sich bindet.",
     tags: ["Ashael", "Haderfels", "verfemte Magie", "Bindung"],
+    appearances: [
+      { chronicle: "kette", acts: [1, 2], role: "Hauptfigur", group: "Haderfels" },
+    ],
   },
   {
     id: "ordensmeister-arveth",
@@ -307,6 +388,9 @@ export const figures: ArchiveEntry[] = [
     summary:
       "Leiter von Haderfels. Arveth spricht in der milden Sprache von Schutz, Stabilisierung und Fürsorge, während die Anstalt Menschen kategorisiert, verwahrt und als Gefahren oder Waffen behandelt.",
     tags: ["Arveth", "Haderfels", "Geschlossene Hand", "Orden"],
+    appearances: [
+      { chronicle: "kette", acts: [1], role: "Wichtige Figur", group: "Haderfels" },
+    ],
   },
   {
     id: "pellan",
@@ -317,6 +401,9 @@ export const figures: ArchiveEntry[] = [
     summary:
       "Junger Schreiber, der Renara’s Abschriften und versiegelte Anweisungen vor ihrem Weg nach Haderfels vorbereitet.",
     tags: ["Pellan", "Fort Rabenstieg", "Schreiber"],
+    appearances: [
+      { chronicle: "kette", acts: [1], role: "Nebenfigur", group: "Fort Rabenstieg" },
+    ],
   },
   {
     id: "leutnant-haren",
@@ -327,6 +414,191 @@ export const figures: ArchiveEntry[] = [
     summary:
       "Junger Offizier der Eskorte nach Haderfels. Haren will sich als brauchbar erweisen, steht für Odrik jedoch noch zu sichtbar unter dem Druck seines eigenen Mutes.",
     tags: ["Haren", "Fort Rabenstieg", "Eskorte"],
+    appearances: [
+      { chronicle: "kette", acts: [1], role: "Nebenfigur", group: "Fort Rabenstieg" },
+    ],
+  },
+  {
+    id: "berr",
+    name: "Berr",
+    eyebrow: "Grenzsoldat · Schütze",
+    group: "Fort Rabenstieg",
+    from: 5,
+    summary:
+      "Grenzsoldat aus dem unteren Westtal. Berr ist abergläubisch, aufmerksam und ein sehr guter Schütze. Er gehört zu Odrik’s ausgewählter Begleitung und wird bei der Sicherung von Menschen und Akten mehrfach wichtig.",
+    tags: ["Berr", "Fort Rabenstieg", "Grenzsoldat", "Eskorte"],
+    appearances: [
+      { chronicle: "kette", acts: [1], role: "Nebenfigur", group: "Fort Rabenstieg" },
+    ],
+  },
+  {
+    id: "jost",
+    name: "Jost",
+    eyebrow: "Grenzsoldat",
+    group: "Fort Rabenstieg",
+    from: 5,
+    summary:
+      "Grenzsoldat aus Fort Rabenstieg. Er möchte Gefahren gern erkennen, bevor sie ihn erreichen, handelt aber auch unter Druck. Gemeinsam mit Berr gehört er zu Renara’s wiederkehrender Begleitung.",
+    tags: ["Jost", "Fort Rabenstieg", "Grenzsoldat", "Eskorte"],
+    appearances: [
+      { chronicle: "kette", acts: [1], role: "Nebenfigur", group: "Fort Rabenstieg" },
+    ],
+  },
+  {
+    id: "theomar-drys",
+    name: "Kanzler Theomar Drys",
+    eyebrow: "Kanzlersitz · Kronrat",
+    group: "Kronrat",
+    from: 6,
+    summary:
+      "Inhaber des Kanzlersitzes und ranghöchster Mann der staatlichen Verwaltung. Drys kontrolliert Erlasse, Siegel, Staatsakten, Protokoll, Kronratsverfahren und einen grossen Teil des geregelten Zugangs zum König.",
+    tags: ["Theomar Drys", "Kronrat", "Kanzlersitz", "Haus Drys"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Wichtige Figur", group: "Kronrat" },
+    ],
+  },
+  {
+    id: "jorek-vanth",
+    name: "Minister Jorek Vanth",
+    eyebrow: "Eisenbahn und Telegraf · Kronrat",
+    group: "Kronrat",
+    from: 6,
+    summary:
+      "Inhaber des Eisenbahn- und Telegrafensitzes. Vanth steht für Schienenlinien, Telegrafennetze, Transportkonzessionen, Bahnhöfe, Gütercodes und Fahrpläne. Wo andere Mauern besitzen, besitzt sein Bereich Bewegung.",
+    tags: ["Jorek Vanth", "Kronrat", "Eisenbahn", "Telegraf"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Wichtige Figur", group: "Kronrat" },
+    ],
+  },
+  {
+    id: "yvessa-rauth",
+    name: "Marschallin Yvessa Rauth",
+    eyebrow: "Militärsitz · Kronrat",
+    group: "Kronrat",
+    from: 6,
+    summary:
+      "Oberste militärische Stimme im Kronrat. Rauth verantwortet Heer, Grenzregimenter, Kriegsbudget, militärische Ernennungen und Drachengarnisonen und kennt Berichte über Renara’s Einsatz in Marathien.",
+    tags: ["Yvessa Rauth", "Kronrat", "Militärsitz", "Drachengarnisonen"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Wichtige Figur", group: "Kronrat" },
+    ],
+  },
+  {
+    id: "caspar-veynt",
+    name: "Lord Caspar Veynt",
+    eyebrow: "Finanz und Handel · Kronrat",
+    group: "Kronrat",
+    from: 6,
+    summary:
+      "Inhaber des Finanz- und Handelssitzes. Sein Machtbereich umfasst Staatsschulden, Zölle, Bankhäuser, Kredite, Caldris und marathische Handelskonzessionen.",
+    tags: ["Caspar Veynt", "Kronrat", "Finanzen", "Handel"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Wichtige Figur", group: "Kronrat" },
+    ],
+  },
+  {
+    id: "maeron-voss",
+    name: "Hochrichter-Bischof Maeron Voss",
+    eyebrow: "Kirche und Recht · Kronrat",
+    group: "Kronrat",
+    from: 6,
+    summary:
+      "Inhaber des kirchlich-rechtlichen Sitzes. Maeron Voss verbindet Kronkirche und Recht: Eide, Eheverträge, kirchliche Gerichte, Krönungsfragen und Verfahren im Zusammenhang mit verfemter Magie.",
+    tags: ["Maeron Voss", "Kronrat", "Kronkirche", "Recht"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Wichtige Figur", group: "Kronrat" },
+    ],
+  },
+  {
+    id: "selvara-ilvain",
+    name: "Rektorin Selvara Ilvain",
+    eyebrow: "Akademie und Sigillen · Kronrat",
+    group: "Kronrat",
+    from: 6,
+    summary:
+      "Inhaberin des Akademie- und Sigillensitzes und Leiterin von Silbrück. Ihr Bereich umfasst Sigillenakademien, technische Gutachten, Forschung, Sternmetallprüfung und akademische Zuständigkeiten.",
+    tags: ["Selvara Ilvain", "Kronrat", "Silbrück", "Sigillen"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Wichtige Figur", group: "Kronrat" },
+    ],
+  },
+  {
+    id: "maressa-ilvain",
+    name: "Maressa Ilvain",
+    eyebrow: "Heilerin · Sigillenmedizinerin",
+    group: "Silbrück",
+    from: 6,
+    summary:
+      "Heilerin und Sigillenmedizinerin aus Silbrück sowie Selvara Ilvain’s Nichte. Maressa betrachtet magische Verletzungen, Bindungsschäden und körperliche Risiken mit medizinischem Blick.",
+    tags: ["Maressa Ilvain", "Silbrück", "Heilerin", "Sigillenmedizin"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Wichtige Figur", group: "Silbrück" },
+    ],
+  },
+  {
+    id: "pell-palast",
+    name: "Pell",
+    eyebrow: "Haushofmeister des Königspalasts",
+    group: "Veyrheim",
+    from: 6,
+    summary:
+      "Haushofmeister des Königspalasts in Veyrheim. Pell kennt Türen, Schlüssel, Tagesabläufe, Audienzen und die kleinen Regeln, durch die ein Palast tatsächlich funktioniert. Nicht mit dem Schreiber Pellan zu verwechseln.",
+    tags: ["Pell", "Veyrheim", "Königspalast", "Haushofmeister"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Nebenfigur", group: "Veyrheim" },
+    ],
+  },
+  {
+    id: "saren-keld",
+    name: "Saren Keld",
+    eyebrow: "Obertelegrafist",
+    group: "Veyrheim",
+    from: 6,
+    summary:
+      "Obertelegrafist der Hauptzentrale von Veyrheim. Keld kennt Leitungen, Provinzknoten, Störungen und technische Eigenheiten des Telegrafennetzes und weiss, welcher Draht tatsächlich spricht.",
+    tags: ["Saren Keld", "Veyrheim", "Telegraf", "Hauptzentrale"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Nebenfigur", group: "Veyrheim" },
+    ],
+  },
+  {
+    id: "mirelle-kasten",
+    name: "Mirelle Kasten",
+    eyebrow: "Druckerin · Flugblattmacherin",
+    group: "Veyrheim",
+    from: 6,
+    summary:
+      "Druckerin und Flugblattmacherin in Veyrheim’s Druckergassen. Sie bewegt sich zwischen Zeitungen, Karikaturen, Gerüchten und ersten Fassungen politischer Ereignisse.",
+    tags: ["Mirelle Kasten", "Veyrheim", "Druckergassen", "Flugblätter"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Nebenfigur", group: "Veyrheim" },
+    ],
+  },
+  {
+    id: "tavin-orrholt",
+    name: "Tavin Orrholt",
+    eyebrow: "Archivverwalter · Versorgungsoffizier",
+    group: "Thalenwacht",
+    from: 6,
+    summary:
+      "Alter Archivverwalter und ehemaliger Versorgungsoffizier aus dem Umfeld Thalenwacht’s. Er kennt Meren’s Zeit, alte Transportlisten und jene Unterschriften, die in späteren Akten leicht übersehen werden.",
+    tags: ["Tavin Orrholt", "Thalenwacht", "Archiv", "Versorgung"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Nebenfigur", group: "Thalenwacht" },
+    ],
+  },
+  {
+    id: "evelyne-drys",
+    name: "Lady Evelyne Drys",
+    eyebrow: "Junge Adlige · Haus Drys",
+    group: "Veyrheim",
+    from: 6,
+    summary:
+      "Grossnichte Kanzler Theomar Drys’ und Teil des höfischen Umfelds der Kanzlerfamilie. Sie steht in enger gesellschaftlicher Verbindung zum Kreis um Prinz Caedren, ist aber selbst keine Kronrätin.",
+    tags: ["Evelyne Drys", "Haus Drys", "Veyrheim", "Caedren"],
+    appearances: [
+      { chronicle: "kette", acts: [2], role: "Nebenfigur", group: "Veyrheim" },
+    ],
   },
 ];
 
